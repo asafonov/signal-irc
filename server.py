@@ -37,7 +37,7 @@ def get_messages(conn):
                 attachments = msg['envelope']['dataMessage']['attachments']
                 if len(attachments) > 0:
                     for a in range(len(attachments)):
-                        body = 'file://' + os.path.expanduser('~/.local/share/signal-cli/attachments/' + msg['envelope']['dataMessage']['attachments'][a]['id'])
+                        body = 'file://' + os.path.expanduser('~/.local/share/signal-cli/attachments/' + str(msg['envelope']['dataMessage']['attachments'][a]['id']))
                         command = ':' + number + ' PRIVMSG ' + number + ' :' + body
                         print('< ' + command)
                         conn.sendall((command + '\r\n').encode('utf-8'))
