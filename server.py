@@ -29,14 +29,15 @@ def get_messages(conn):
             msg = json.loads(data[i])
             if msg['envelope']['dataMessage'] is not None:
                 number = msg['envelope']['source'][1:]
-                body = msg['envelope']['dataMessage']['message']
-                command = ':' + number + ' PRIVMSG ' + number + ' :' + body
-                print('< ' + command)
-                conn.sendall((command + '\r\n').encode('utf-8'))
+                body = msg['envelope']['dataMessage']['message'].split('\n')
+                for l in range(len(body)):
+                    command = ':' + number + ' PRIVMSG ' + number + ' :' + body[l]
+                    print('< ' + command)
+                    conn.sendall((command + '\r\n').encode('utf-8'))
                 attachments = msg['envelope']['dataMessage']['attachments']
                 if len(attachments) > 0:
-                    for j in range(len(attachments)):
-                        body = 'File attached: ' + msg['envelope']['dataMessage']['attachments'][j]
+                    for a in range(len(attachments)):
+                        body = 'file://' + os.path.expanduser('~/.local/share/signal-cli/attachments/' + msg['envelope']['dataMessage']['attachments'][a]['id'])
                         command = ':' + number + ' PRIVMSG ' + number + ' :' + body
                         print('< ' + command)
                         conn.sendall((command + '\r\n').encode('utf-8'))
