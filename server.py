@@ -32,13 +32,13 @@ def get_messages(conn):
                 body = msg['envelope']['dataMessage']['message'].split('\n')
                 for l in range(len(body)):
                     command = ':' + number + ' PRIVMSG ' + number + ' :' + body[l]
-                    conn.sendall((command + '\r\n').encode('utf-8'))
+                    conn.sendall((command + '\n').encode('utf-8'))
                 attachments = msg['envelope']['dataMessage']['attachments']
                 if len(attachments) > 0:
                     for a in range(len(attachments)):
                         body = 'file://' + os.path.expanduser('~/.local/share/signal-cli/attachments/' + str(msg['envelope']['dataMessage']['attachments'][a]['id']))
                         command = ':' + number + ' PRIVMSG ' + number + ' :' + body
-                        conn.sendall((command + '\r\n').encode('utf-8'))
+                        conn.sendall((command + '\n').encode('utf-8'))
             
 client_connection, client_address = listen_socket.accept()
 
@@ -51,12 +51,12 @@ while True:
             get_messages(client_connection)
             if time.time() - last_ping > 300:
                 last_ping = time.time()
-                client_connection.sendall(('PING ' + str(time.time()) + '\r\n').encode('utf-8'))
+                client_connection.sendall(('PING ' + str(time.time()) + '\n').encode('utf-8'))
 
         continue
 
     request = client_connection.recv(1024)
-    req_s = request.decode('utf-8').split("\r\n")
+    req_s = request.decode('utf-8').split("\n")
 
     if len(req_s) == 1 and req_s[0] == '':
         _nick = ''
@@ -68,6 +68,7 @@ while True:
     for i in range(len(req_s)):
         if len(req_s[i]) > 0:
             print('> ' + req_s[i])
+            req_s[i] = req_s[i].replace('\r', '')
         if req_s[i][0:4] == 'NICK':
             _nick = req_s[i][5:]
         if req_s[i][0:4] == 'PASS':
@@ -77,7 +78,7 @@ while True:
             privmsg(req_s[i][8:pos], req_s[i][pos+1:])
 
     if _nick == NICK and _pass == PASS and not _authorized:
-        client_connection.sendall('375 signal-irc :- Welcome to Signal IRC bridge\r\n'.encode('utf-8'))
+        client_connection.sendall('375 signal-irc :- Welcome to Signal IRC bridge\n'.encode('utf-8'))
         _authorized = True
 
 client_connection.close()
