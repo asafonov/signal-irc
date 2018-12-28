@@ -2,6 +2,7 @@ import socket, os, select, re, json, time
 
 HOST, PORT = '', 9094
 NICK, PASS = os.environ['SIGNAL_IRC_NICK'], os.environ['SIGNAL_IRC_PASS']
+PATH = os.environ['SIGNAL_IRC_PATH'] if 'SIGNAL_IRC_PATH' in os.environ else '/run/user/1000/signal'
 
 listen_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 listen_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -19,10 +20,10 @@ def privmsg(to, msg):
     os.system(cmd)
 
 def get_messages(conn):
-    f = open('/run/user/1000/signal')
+    f = open(PATH)
     data = f.read().replace(chr(0), '').split('\n')
     f.close()
-    os.system('echo "" > /run/user/1000/signal')
+    os.system('echo "" > ' + PATH)
     number = ''
     for i in range(len(data)):
         if len(data[i]) > 0:
