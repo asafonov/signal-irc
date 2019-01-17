@@ -14,9 +14,19 @@ print('Starting signal-irc bridge on port ' + str(PORT) + ' ...')
 _nick = ''
 _pass = ''
 _authorized = False
+users = get_users()
+
+def get_users():
+    f = open(os.expanduser("~") + '/.signal-irc/addressbook')
+    data = json.loads(f.read())
+    f.close()
+    return data
 
 def privmsg(to, msg):
-    cmd = "signal-cli --dbus send +" + to + " -m \"" + msg + "\""
+    number = to
+    if to in users:
+        number = users[to]
+    cmd = "signal-cli --dbus send +" + number + " -m \"" + msg + "\""
     os.system(cmd)
 
 def get_messages(conn):
@@ -30,15 +40,21 @@ def get_messages(conn):
             msg = json.loads(data[i])
             if msg['envelope']['dataMessage'] is not None:
                 number = msg['envelope']['source'][1:]
+                username = number
+                for user in users:
+                    if users[user] == number:
+                        username = user
+                        break
+
                 body = msg['envelope']['dataMessage']['message'].split('\n')
                 for l in range(len(body)):
-                    command = ':' + number + ' PRIVMSG ' + number + ' :' + body[l]
+                    command = ':' + username + ' PRIVMSG ' + username + ' :' + body[l]
                     conn.sendall((command + '\n').encode('utf-8'))
                 attachments = msg['envelope']['dataMessage']['attachments']
                 if len(attachments) > 0:
                     for a in range(len(attachments)):
                         body = 'file://' + os.path.expanduser('~/.local/share/signal-cli/attachments/' + str(msg['envelope']['dataMessage']['attachments'][a]['id']))
-                        command = ':' + number + ' PRIVMSG ' + number + ' :' + body
+                        command = ':' + username + ' PRIVMSG ' + username + ' :' + body
                         conn.sendall((command + '\n').encode('utf-8'))
             
 client_connection, client_address = listen_socket.accept()
@@ -77,6 +93,9 @@ while True:
         if req_s[i][0:7] == 'PRIVMSG' and _authorized:
             pos = req_s[i].find(':')
             privmsg(req_s[i][8:pos], req_s[i][pos+1:])
+        if req_s[i][0:3] == 'WHO' and _authorized:
+            for user in users):
+                client_connection.sendall(('352 #signal-irc signal-irc signal-irc signal-irc ' + users[i] + 'H :0 ' + users[i]).encode('utf-8')).
 
     if _nick == NICK and _pass == PASS and not _authorized:
         client_connection.sendall('375 signal-irc :- Welcome to Signal IRC bridge\n'.encode('utf-8'))
