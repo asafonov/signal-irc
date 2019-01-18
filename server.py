@@ -90,12 +90,15 @@ while True:
         if req_s[i][0:7] == 'PRIVMSG' and _authorized:
             pos = req_s[i].find(':')
             privmsg(req_s[i][8:pos].strip(), req_s[i][pos+1:])
-        if req_s[i][0:3] == 'WHO' and _authorized:
+        if req_s[i][0:4] == 'JOIN' and _authorized:
+            channel = req_s[i][5:]
+            client_connection.sendall(('352 signal.asafonov.org ' + channel + ' ' + NICK + ' signal-irc signal-irc ' + NICK + ' H :0 ' + NICK + '\n').encode('utf-8'))
             for user in users:
-                client_connection.sendall(('352 signal-irc signal-irc signal-irc signal-irc ' + user + 'H :0 ' + user + '\n').encode('utf-8'))
+                client_connection.sendall(('352 signal.asafonov.org ' + channel + ' ' + user + ' signal-irc signal-irc ' + user + ' H :0 ' + user + '\n').encode('utf-8'))
+            client_connection.sendall(('315 ' + NICK + ' :End of WHO list\n').encode('utf-8'))
 
     if _nick == NICK and _pass == PASS and not _authorized:
-        client_connection.sendall('375 signal-irc :- Welcome to Signal IRC bridge\n'.encode('utf-8'))
+        client_connection.sendall(('375 ' + NICK + ' :- Welcome to Signal IRC bridge\n').encode('utf-8'))
         _authorized = True
 
 client_connection.close()
