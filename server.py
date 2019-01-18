@@ -14,13 +14,10 @@ print('Starting signal-irc bridge on port ' + str(PORT) + ' ...')
 _nick = ''
 _pass = ''
 _authorized = False
-users = get_users()
 
-def get_users():
-    f = open(os.expanduser("~") + '/.signal-irc/addressbook')
-    data = json.loads(f.read())
-    f.close()
-    return data
+f = open(os.path.expanduser("~") + '/.signal-irc/addressbook')
+users = json.loads(f.read())
+f.close()
 
 def privmsg(to, msg):
     number = to
@@ -92,10 +89,10 @@ while True:
             _pass = req_s[i][5:]
         if req_s[i][0:7] == 'PRIVMSG' and _authorized:
             pos = req_s[i].find(':')
-            privmsg(req_s[i][8:pos], req_s[i][pos+1:])
+            privmsg(req_s[i][8:pos].strip(), req_s[i][pos+1:])
         if req_s[i][0:3] == 'WHO' and _authorized:
-            for user in users):
-                client_connection.sendall(('352 #signal-irc signal-irc signal-irc signal-irc ' + users[i] + 'H :0 ' + users[i]).encode('utf-8')).
+            for user in users:
+                client_connection.sendall(('352 signal-irc signal-irc signal-irc signal-irc ' + user + 'H :0 ' + user + '\n').encode('utf-8'))
 
     if _nick == NICK and _pass == PASS and not _authorized:
         client_connection.sendall('375 signal-irc :- Welcome to Signal IRC bridge\n'.encode('utf-8'))
