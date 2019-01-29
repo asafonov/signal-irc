@@ -23,7 +23,7 @@ def privmsg(to, msg):
     number = to
     if to in users:
         number = users[to]
-    cmd = "signal-cli --dbus send +" + number + " -m \"" + msg + "\""
+    cmd = "signal-cli --dbus send +" + number + " -m \"" + msg.replace('"', '\\"') + "\""
     os.system(cmd)
 
 def get_messages(conn):
