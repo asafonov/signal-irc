@@ -1,6 +1,6 @@
 import socket, os, select, re, json, time
 
-HOST, PORT = '', 9094
+HOST, PORT = '127.0.0.1', 9094
 NICK, PASS = os.environ['SIGNAL_IRC_NICK'], os.environ['SIGNAL_IRC_PASS']
 PATH = os.environ['SIGNAL_IRC_PATH'] if 'SIGNAL_IRC_PATH' in os.environ else '/run/user/1000/signal'
 
